@@ -1,0 +1,13 @@
+{
+	"folders": [
+    {
+      "path": "."
+    },
+    {
+      "path": "../../components/esp32-s3-hal-rgb"
+    }
+  ],
+  "settings": {
+    "C_Cpp.autoAddFileAssociations": false
+  }
+}
