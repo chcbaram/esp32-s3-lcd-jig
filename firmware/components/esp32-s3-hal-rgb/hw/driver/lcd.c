@@ -100,7 +100,7 @@ bool lcdInit(void)
 
 
   mutex_lock = xSemaphoreCreateMutex();
-  lcd_event.evt_queue_vsync = xQueueCreate(3, 0);
+  lcd_event.evt_queue_vsync = xQueueCreate(LCD_FRAME_BUF_MAX, 0);
 
   ret = st7701Init();
   logPrintf("[%s] st7701Init()\n", ret ? "OK":"NG");
@@ -121,7 +121,6 @@ bool lcdInit(void)
   for (int i=0; i<LCD_FRAME_BUF_MAX; i++)
   {
     lcd_frame.is_done[i] = false;
-    // lcd_frame.buffer[i] = lcdcGetFrameBuffer(i);
     lcd_frame.buffer_lcd[i] = lcdcGetFrameBuffer(i);
     lcd_frame.buffer[i] = heap_caps_aligned_calloc(64, 1, LCD_WIDTH * LCD_HEIGHT * 2, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
 
@@ -131,7 +130,7 @@ bool lcdInit(void)
       break;
     }
   }
-  qbufferCreate(&lcd_frame.q_event, lcd_frame.q_buf, 4);
+  qbufferCreate(&lcd_frame.q_event, lcd_frame.q_buf, LCD_FRAME_BUF_MAX);
 
   is_init = ret;
 
@@ -182,8 +181,6 @@ LCD_OPT_DEF void lcdBufferRotate(uint16_t *to, const uint16_t *from)
 
 static void lcdThread(void* arg)
 {
-  uint32_t cnt = 0;
-
   while(1) 
   {
     if(xQueueReceive(lcd_event.evt_queue_vsync, NULL, portMAX_DELAY)) 
@@ -191,18 +188,10 @@ static void lcdThread(void* arg)
       draw_frame_time = millis() - draw_pre_time;
       draw_pre_time = millis();
 
-      // if (is_request_draw == true)
       if (qbufferAvailable(&lcd_frame.q_event) > 0)
       {
         uint8_t index;
 
-        cnt++;
-
-        // if (cnt%2 == 0)
-        //   continue;
-
-        //index = lcd_frame.index;
-        //lcdSwapFrameBuffer();
         qbufferRead(&lcd_frame.q_event, &index, 1);
 
         #if HW_LCD_ROTATE == 1
@@ -212,12 +201,7 @@ static void lcdThread(void* arg)
         #endif
         lcdcRefreshFrameBuffer(lcd_frame.buffer_lcd[index]);
         
-        // lcdcRefreshFrameBuffer(lcd_frame.buffer[lcd_frame.index]);
-        // lcd_frame.index = (lcd_frame.index + 1) % LCD_FRAME_BUF_MAX;
-        // lcd_frame.draw_buffer = lcd_frame.buffer[lcd_frame.index];
-
         is_request_draw = false;
-
         lcd_frame.is_done[index] = true;        
         delay(1);
       }
@@ -356,10 +340,11 @@ void lcdUpdateDraw(void)
 bool lcdDrawAvailable(void)
 {
   bool ret = false;
+  uint16_t wr_len;
  
-  // ret = !is_request_draw;
+  wr_len = lcd_frame.q_event.len - qbufferAvailable(&lcd_frame.q_event) - 1;
 
-  if (qbufferAvailable(&lcd_frame.q_event) < 2)
+  if (wr_len > 0)
   {
     ret = true;
   }
