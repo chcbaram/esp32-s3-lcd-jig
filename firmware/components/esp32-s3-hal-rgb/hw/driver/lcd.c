@@ -288,15 +288,12 @@ IRAM_ATTR bool lcdTransferDoneISR(void)
 bool lcdRequestDraw(void)
 {
   if (is_init != true) return false;
-  // if (is_request_draw == true) return false;
+
 
   is_request_index = lcd_frame.index;
   lcd_frame.is_done[lcd_frame.index] = false;
-  // is_request_draw = true;
-  // lcdcRefreshFrameBuffer(lcdGetFrameBuffer());
 
   qbufferWrite(&lcd_frame.q_event, (uint8_t *)&lcd_frame.index, 1);
-  // lcdcRefreshFrameBuffer(lcd_frame.buffer[lcd_frame.index]);
 
   lcd_frame.index = (lcd_frame.index + 1) % LCD_FRAME_BUF_MAX;
   lcd_frame.draw_buffer = lcd_frame.buffer[lcd_frame.index];
