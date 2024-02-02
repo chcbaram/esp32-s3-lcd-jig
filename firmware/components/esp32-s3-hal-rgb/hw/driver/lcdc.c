@@ -44,6 +44,8 @@ static esp_lcd_panel_handle_t h_panel = NULL;
 static bool is_init = false;
 static bool is_begin = false;
 static bool (*p_call_func)(void) = NULL;
+
+
 static uint32_t lcdc_width  = LCD_WIDTH;
 static uint32_t lcdc_height = LCD_HEIGHT;
 
@@ -80,27 +82,20 @@ bool lcdcBegin(uint16_t width, uint16_t height, uint8_t bus_width, uint32_t freq
       },
       .timings = {
           .pclk_hz = freq_mhz * 1000 * 1000,
+          #if HW_LCD_ROTATE == 1
+          .h_res = height,
+          .v_res = width,
+          #else
           .h_res = width,
           .v_res = height,
+          #endif
           // The following parameters should refer to LCD spec
           .hsync_back_porch   = 50, // 50
           .hsync_front_porch  = 10, // 10
           .hsync_pulse_width  = 8,
           .vsync_back_porch   = 20, // 20
           .vsync_front_porch  = 10, // 10
-          .vsync_pulse_width  = 8,
-          
-    //           struct {
-    //     uint32_t hsync_idle_low: 1;  /*!< The hsync signal is low in IDLE state */
-    //     uint32_t vsync_idle_low: 1;  /*!< The vsync signal is low in IDLE state */
-    //     uint32_t de_idle_high: 1;    /*!< The de signal is high in IDLE state */
-    //     uint32_t pclk_active_neg: 1; /*!< Whether the display data is clocked out on the falling edge of PCLK */
-    //     uint32_t pclk_idle_high: 1;  /*!< The PCLK stays at high level in IDLE phase */
-    // } flags;  
-
-          // .flags.hsync_idle_low = 1,
-          // .flags.vsync_idle_low = 1,
-          // .flags.de_idle_high   = 1,
+          .vsync_pulse_width  = 8,      
       },
       .flags.fb_in_psram       = true, // allocate frame buffer in PSRAM
       .flags.refresh_on_demand = false,
@@ -129,6 +124,11 @@ bool lcdcBegin(uint16_t width, uint16_t height, uint8_t bus_width, uint32_t freq
   {
     return false;
   }
+
+  #if HW_LCD_ROTATE == 1
+  esp_lcd_panel_swap_xy(h_panel, true);
+  esp_lcd_panel_mirror(h_panel, true, false);
+  #endif
 
   lcdc_width  = width;
   lcdc_height = height;
@@ -163,6 +163,7 @@ bool lcdcRefreshFrameBuffer(void *buf)
   if (is_begin != true) return false;
 
   esp_lcd_panel_draw_bitmap(h_panel, 0, 0, lcdc_width, lcdc_height, buf);
+  // esp_lcd_panel_draw_bitmap(h_panel, 0, 0, lcdc_height, lcdc_width, buf);
   return true;
 }
 

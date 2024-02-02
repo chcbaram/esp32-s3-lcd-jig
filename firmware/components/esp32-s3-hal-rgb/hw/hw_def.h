@@ -32,6 +32,8 @@
 #define _USE_HW_NVS
 #define _USE_HW_CDC
 #define _USE_HW_LCDC
+#define _USE_HW_LVGL
+
 
 #define _USE_HW_UART
 #define      HW_UART_MAX_CH         2
@@ -73,9 +75,15 @@
 #define _USE_HW_LCD
 #define      HW_LCD_LVGL            1
 #define      HW_LCD_LOGO            1
+#define      HW_LCD_ROTATE          1
+
+#if HW_LCD_ROTATE == 1
+#define      HW_LCD_WIDTH           HW_ST7701_HEIGHT
+#define      HW_LCD_HEIGHT          HW_ST7701_WIDTH
+#else
 #define      HW_LCD_WIDTH           HW_ST7701_WIDTH
 #define      HW_LCD_HEIGHT          HW_ST7701_HEIGHT
-
+#endif
 
 #define _PIN_GPIO_LCD_TS_RST        1
 #define _PIN_GPIO_LCD_BLK           2

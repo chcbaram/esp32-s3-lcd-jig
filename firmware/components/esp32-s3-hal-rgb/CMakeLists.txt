@@ -12,8 +12,8 @@ file(GLOB_RECURSE SRC_FILES_RECURSE
   common/*.c 
 
   # LVGL
-  # hw/driver/lvgl/*.c
-  # lib/lvgl/*.c
+  hw/driver/lvgl/*.c
+  lib/lvgl/*.c
 )
 
 

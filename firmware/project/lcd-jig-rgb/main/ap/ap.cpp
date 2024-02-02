@@ -1,4 +1,5 @@
 #include "ap.h"
+#include "lvgl/ui.h"
 
 static void cliThread(void *args);
 
@@ -23,16 +24,30 @@ void apInit(void)
 void apMain(void)
 {
   uint32_t pre_time;
+  uint8_t index = 0;
 
+
+  lvglInit();
+
+  ui_init();
   
   pre_time = millis();
   while(1)
   {
-    if (millis()-pre_time >= 1000)
+    if (millis()-pre_time >= 2000)
     {
       pre_time = millis();
+
+      if (index%2 == 0)
+        lv_event_send(ui_Button2, LV_EVENT_CLICKED, NULL);
+      else
+        lv_event_send(ui_Button3, LV_EVENT_CLICKED, NULL);
+
+      index++;
     }
     delay(1);   
+
+    lvglUpdate();
   }
 }
 

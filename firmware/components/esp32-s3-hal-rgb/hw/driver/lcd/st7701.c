@@ -103,10 +103,13 @@ bool st7701InitRegs(void)
   st7701WriteCmd(0x36);   // MADCTL (36h): Memory Data Access Control
   uint8_t reg = 0;
   reg |= (0<<7);  // MY
-  reg |= (1<<6);  // MX
-  reg |= (1<<5);  // MV
+  reg |= (0<<6);  // MX
+  reg |= (0<<5);  // MV
   reg |= (0<<4);  // ML
-  reg |= (0<<2);  // MH
+  #if HW_LCD_ROTATE == 1
+  reg |= (1<<2);  // MH
+  #endif
+  reg |= (1<<3);  // RGB
   st7701WriteData(reg);
 
   st7701WriteCmd(0x21);   // Display Inversion On

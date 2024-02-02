@@ -30,6 +30,7 @@
 typedef struct
 {
   uint16_t  *buffer[LCD_FRAME_BUF_MAX];
+  uint16_t  *buffer_lcd[LCD_FRAME_BUF_MAX];
   uint32_t   index;
   uint16_t  *draw_buffer;
   bool       is_done[LCD_FRAME_BUF_MAX];
@@ -99,7 +100,7 @@ bool lcdInit(void)
 
 
   mutex_lock = xSemaphoreCreateMutex();
-
+  lcd_event.evt_queue_vsync = xQueueCreate(3, 0);
 
   ret = st7701Init();
   logPrintf("[%s] st7701Init()\n", ret ? "OK":"NG");
@@ -109,7 +110,7 @@ bool lcdInit(void)
 
   lcdcSetCallBack(lcdTransferDoneISR);
 
-  ret = lcdcBegin(LCD_WIDTH, LCD_HEIGHT, 16, 12);
+  ret = lcdcBegin(LCD_WIDTH, LCD_HEIGHT, 16, 10);
   logPrintf("[%s] lcdcBegin()\n", ret ? "OK":"NG");
 
   if (ret != true)
@@ -120,7 +121,9 @@ bool lcdInit(void)
   for (int i=0; i<LCD_FRAME_BUF_MAX; i++)
   {
     lcd_frame.is_done[i] = false;
-    lcd_frame.buffer[i] = lcdcGetFrameBuffer(i);
+    // lcd_frame.buffer[i] = lcdcGetFrameBuffer(i);
+    lcd_frame.buffer_lcd[i] = lcdcGetFrameBuffer(i);
+    lcd_frame.buffer[i] = heap_caps_aligned_calloc(64, 1, LCD_WIDTH * LCD_HEIGHT * 2, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
 
     if (lcd_frame.buffer[i] == NULL)
     {
@@ -141,8 +144,7 @@ bool lcdInit(void)
       lcd_frame.draw_buffer[i] = black;
     }
   }
-
-  lcd_event.evt_queue_vsync = xQueueCreate(3, 0);
+  
   xTaskCreate(lcdThread, "lcdThread", _HW_DEF_RTOS_THREAD_MEM_LCD, NULL, _HW_DEF_RTOS_THREAD_PRI_LCD, NULL);
 
 
@@ -160,8 +162,28 @@ bool lcdInit(void)
   return ret;
 }
 
+LCD_OPT_DEF void lcdBufferRotate(uint16_t *to, const uint16_t *from)
+{
+  uint32_t j;
+  uint32_t i;  
+  uint32_t offset;
+
+  for (int y = 0; y < LCD_HEIGHT; y++)
+  {
+    offset = y * LCD_WIDTH;
+    for (int x = 0; x < LCD_WIDTH; x++)
+    {
+      j = (offset) + x;
+      i = (x * LCD_HEIGHT) + y;
+      to[i] = from[j];
+    }
+  }
+}
+
 static void lcdThread(void* arg)
 {
+  uint32_t cnt = 0;
+
   while(1) 
   {
     if(xQueueReceive(lcd_event.evt_queue_vsync, NULL, portMAX_DELAY)) 
@@ -174,13 +196,30 @@ static void lcdThread(void* arg)
       {
         uint8_t index;
 
+        cnt++;
+
+        // if (cnt%2 == 0)
+        //   continue;
+
         //index = lcd_frame.index;
         //lcdSwapFrameBuffer();
         qbufferRead(&lcd_frame.q_event, &index, 1);
-        //lcdcRefreshFrameBuffer(lcd_frame.buffer[index]);
+
+        #if HW_LCD_ROTATE == 1
+        lcdBufferRotate(lcd_frame.buffer_lcd[index], lcd_frame.buffer[index]);
+        #else
+        memcpy(lcd_frame.buffer_lcd[index], lcd_frame.buffer[index], LCD_WIDTH * LCD_HEIGHT * 2);
+        #endif
+        lcdcRefreshFrameBuffer(lcd_frame.buffer_lcd[index]);
+        
+        // lcdcRefreshFrameBuffer(lcd_frame.buffer[lcd_frame.index]);
+        // lcd_frame.index = (lcd_frame.index + 1) % LCD_FRAME_BUF_MAX;
+        // lcd_frame.draw_buffer = lcd_frame.buffer[lcd_frame.index];
+
         is_request_draw = false;
 
         lcd_frame.is_done[index] = true;        
+        delay(1);
       }
     }
   }
@@ -273,7 +312,7 @@ bool lcdRequestDraw(void)
   // lcdcRefreshFrameBuffer(lcdGetFrameBuffer());
 
   qbufferWrite(&lcd_frame.q_event, (uint8_t *)&lcd_frame.index, 1);
-  lcdcRefreshFrameBuffer(lcd_frame.buffer[lcd_frame.index]);
+  // lcdcRefreshFrameBuffer(lcd_frame.buffer[lcd_frame.index]);
 
   lcd_frame.index = (lcd_frame.index + 1) % LCD_FRAME_BUF_MAX;
   lcd_frame.draw_buffer = lcd_frame.buffer[lcd_frame.index];
@@ -320,7 +359,7 @@ bool lcdDrawAvailable(void)
  
   // ret = !is_request_draw;
 
-  if (qbufferAvailable(&lcd_frame.q_event) < 3)
+  if (qbufferAvailable(&lcd_frame.q_event) < 2)
   {
     ret = true;
   }

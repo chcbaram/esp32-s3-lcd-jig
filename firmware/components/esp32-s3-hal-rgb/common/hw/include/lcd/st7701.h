@@ -14,8 +14,8 @@ extern "C" {
 
 
 
-#define ST7701_WIDTH     HW_ST7701_WIDTH
-#define ST7701_HEIGHT    HW_ST7701_HEIGHT
+#define ST7701_WIDTH     HW_LCD_WIDTH
+#define ST7701_HEIGHT    HW_LCD_HEIGHT
 
 
 
