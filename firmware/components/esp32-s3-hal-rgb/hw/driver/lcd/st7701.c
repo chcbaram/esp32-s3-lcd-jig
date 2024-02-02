@@ -105,12 +105,12 @@ bool st7701InitRegs(void)
   reg |= (0<<7);  // MY
   reg |= (1<<6);  // MX
   reg |= (1<<5);  // MV
-  reg |= (1<<4);  // ML
-  reg |= (1<<2);  // MH
+  reg |= (0<<4);  // ML
+  reg |= (0<<2);  // MH
   st7701WriteData(reg);
 
-
   st7701WriteCmd(0x21);   // Display Inversion On
+
   
   st7701WriteCmd(0xB4);   // Display Inversion Control
   st7701WriteData(0x01);
@@ -129,7 +129,7 @@ bool st7701InitRegs(void)
   st7701WriteData(0x20);
 
   st7701WriteCmd(0xB6);  // Display Function Control
-  st7701WriteData(0x20); // A0);
+  st7701WriteData(0xA0); // A0, 20
   st7701WriteData(0x47); // 07
   st7701WriteData(0x3B);
 
@@ -203,13 +203,11 @@ bool st7701InitRegs(void)
   st7701WriteData(0x00); // A0);
   st7701WriteData(0x00); // 42
   st7701WriteData(0x01);
-  st7701WriteData(0xDF);
+  st7701WriteData(0x3F);
 
   st7701WriteCmd(0x2B);
   st7701WriteData(0x00); // A0);
   st7701WriteData(0x00); // 42
-  // st7701WriteData(0x01);
-  // st7701WriteData(0x3F);
   st7701WriteData(0x01);
   st7701WriteData(0xDF);
   

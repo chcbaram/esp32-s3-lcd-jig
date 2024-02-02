@@ -67,8 +67,8 @@
 #define _USE_HW_LCDC
 
 #define _USE_HW_ST7701
-#define      HW_ST7701_WIDTH       480
-#define      HW_ST7701_HEIGHT      320
+#define      HW_ST7701_WIDTH       320
+#define      HW_ST7701_HEIGHT      480
 
 #define _USE_HW_LCD
 #define      HW_LCD_LVGL            1
