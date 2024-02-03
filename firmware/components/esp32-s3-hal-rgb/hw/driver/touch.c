@@ -1,10 +1,11 @@
 #include "touch.h"
-#include "touch/gt911.h"
-#include "cli.h"
-#include "cli_gui.h"
 
 
 #ifdef _USE_HW_TOUCH
+#include "touch/ft6236.h"
+#include "touch/gt911.h"
+#include "cli.h"
+#include "cli_gui.h"
 
 
 static void cliCmd(cli_args_t *args);
@@ -12,8 +13,8 @@ static void cliCmd(cli_args_t *args);
 
 static bool is_init = false;
 static bool is_enable = false;
-static uint16_t touch_width  = 480;
-static uint16_t touch_height = 480;
+static uint16_t touch_width  = HW_LCD_WIDTH;
+static uint16_t touch_height = HW_LCD_HEIGHT;
 
 
 
@@ -21,12 +22,15 @@ bool touchInit(void)
 {
   bool ret = false;
 
+  #ifdef _USE_HW_GT911
+  ret = gt911Init();
+  #endif
+  #ifdef _USE_HW_FT6236
+  ret = ft6236Init();
+  #endif
 
-  // ret = gt911Init();
   if (ret == true)
   {
-    // touch_width  = gt911GetWidth();
-    // touch_height = gt911GetHeight();
     is_init = true;
     is_enable = true;
   }
@@ -41,32 +45,51 @@ bool touchInit(void)
 
 bool touchGetInfo(touch_info_t *p_info)
 {
-  // bool ret;
-  // gt911_info_t ts_info;
+  bool ret;
 
-  // if (is_init == false) return false;
-  // if (is_enable == false)
-  // {
-  //   p_info->count = 0;
-  //   return false;
-  // } 
+  if (is_init == false) return false;
+  if (is_enable == false)
+  {
+    p_info->count = 0;
+    return false;
+  } 
 
-  // ret = gt911GetInfo(&ts_info);
-  // if (ret == true)
-  // {
-  //   p_info->count = ts_info.count;
-  //   for (int i=0; i<ts_info.count; i++)
-  //   {
-  //     p_info->point[i].event = ts_info.point[i].event;
-  //     p_info->point[i].id    = ts_info.point[i].id;
-  //     p_info->point[i].x     = ts_info.point[i].x;
-  //     p_info->point[i].y     = ts_info.point[i].y;
-  //     p_info->point[i].w     = ts_info.point[i].area;
-  //   }
-  // }
+  #ifdef _USE_HW_GT911
+  gt911_info_t ts_info;
 
-  // return ret;
-  return false;
+  ret = gt911GetInfo(&ts_info);
+  if (ret == true)
+  {
+    p_info->count = ts_info.count;
+    for (int i=0; i<ts_info.count; i++)
+    {
+      p_info->point[i].event = ts_info.point[i].event;
+      p_info->point[i].id    = ts_info.point[i].id;
+      p_info->point[i].x     = ts_info.point[i].x;
+      p_info->point[i].y     = ts_info.point[i].y;
+      p_info->point[i].w     = ts_info.point[i].area;
+    }
+  }
+  #endif
+  #ifdef _USE_HW_FT6236
+  ft6236_info_t ts_info;
+
+  ret = ft6236GetInfo(&ts_info);
+  if (ret == true)
+  {
+    p_info->count = ts_info.count;
+    for (int i=0; i<ts_info.count; i++)
+    {
+      p_info->point[i].event = ts_info.point[i].event;
+      p_info->point[i].id    = ts_info.point[i].id;
+      p_info->point[i].x     = ts_info.point[i].x;
+      p_info->point[i].y     = ts_info.point[i].y;
+      p_info->point[i].w     = ts_info.point[i].weight;
+    }
+  }
+  #endif
+
+  return ret;
 }
 
 bool touchSetEnable(bool enable)

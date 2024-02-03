@@ -12,6 +12,8 @@
 #include "gpio.h"
 #include "lcdc.h"
 #include "qbuffer.h"
+#include "rom/cache.h"
+#include "esp_cache.h"
 
 
 #define lock()        xSemaphoreTake(mutex_lock, portMAX_DELAY);
@@ -177,6 +179,8 @@ LCD_OPT_DEF void lcdBufferRotate(uint16_t *to, const uint16_t *from)
       to[i] = from[j];
     }
   }
+
+  esp_cache_msync(to, LCD_WIDTH * LCD_HEIGHT * 2, 0);
 }
 
 static void lcdThread(void* arg)
@@ -199,10 +203,11 @@ static void lcdThread(void* arg)
         #else
         memcpy(lcd_frame.buffer_lcd[index], lcd_frame.buffer[index], LCD_WIDTH * LCD_HEIGHT * 2);
         #endif
-        lcdcRefreshFrameBuffer(lcd_frame.buffer_lcd[index]);
-        
+
         is_request_draw = false;
         lcd_frame.is_done[index] = true;        
+
+        lcdcRefreshFrameBuffer(lcd_frame.buffer_lcd[index]);        
         delay(1);
       }
     }
@@ -282,6 +287,7 @@ IRAM_ATTR bool lcdTransferDoneISR(void)
   BaseType_t high_task_wakeup;
 
   xQueueSendFromISR(lcd_event.evt_queue_vsync, NULL, &high_task_wakeup);
+
   return high_task_wakeup == pdTRUE;
 }
 

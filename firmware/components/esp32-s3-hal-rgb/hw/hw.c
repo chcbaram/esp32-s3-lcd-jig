@@ -33,7 +33,8 @@ bool hwInit(void)
   pwmInit();
   touchInit();
   lcdInit();
-
+  touchInit();
+  
   logPrintf("Free heap : %ld KB\n", esp_get_free_heap_size()/1024);
   logPrintf("Free Heapi: %d KB\n", esp_get_free_internal_heap_size()/1024);
   return true;

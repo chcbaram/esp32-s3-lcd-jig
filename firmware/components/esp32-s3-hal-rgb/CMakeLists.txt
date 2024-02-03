@@ -27,6 +27,7 @@ set(requires
   "app_update"
   "esp_hid"
   "esp_lcd"
+  "esp_mm"
   )
 
 

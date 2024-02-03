@@ -38,10 +38,10 @@ void apMain(void)
     {
       pre_time = millis();
 
-      if (index%2 == 0)
-        lv_event_send(ui_Button2, LV_EVENT_CLICKED, NULL);
-      else
-        lv_event_send(ui_Button3, LV_EVENT_CLICKED, NULL);
+      // if (index%2 == 0)
+      //   lv_event_send(ui_Button2, LV_EVENT_CLICKED, NULL);
+      // else
+      //   lv_event_send(ui_Button3, LV_EVENT_CLICKED, NULL);
 
       index++;
     }

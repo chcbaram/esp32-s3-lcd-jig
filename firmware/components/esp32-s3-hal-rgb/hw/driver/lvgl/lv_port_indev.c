@@ -89,34 +89,34 @@ static void touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
   static lv_coord_t last_x = 0;
   static lv_coord_t last_y = 0;
   static int8_t    last_id = -1;
-  // touch_info_t info;
+  touch_info_t info;
   bool is_pressed = false;
 
 
-  // info.count = 0;
-  // touchGetInfo(&info);
+  info.count = 0;
+  touchGetInfo(&info);
 
-  // for (int i=0; i<info.count; i++)
-  // {
-  //   if (last_id < 0)
-  //   {
-  //     last_id = info.point[i].id;
-  //     last_x = info.point[i].x;
-  //     last_y = info.point[i].y;
-  //     is_pressed = true;
-  //     break;
-  //   }
-  //   else
-  //   {
-  //     if (info.point[i].id == last_id)
-  //     {
-  //       last_x = info.point[i].x;
-  //       last_y = info.point[i].y;
-  //       is_pressed = true;
-  //       break;
-  //     }
-  //   }
-  // }
+  for (int i=0; i<info.count; i++)
+  {
+    if (last_id < 0)
+    {
+      last_id = info.point[i].id;
+      last_x = info.point[i].x;
+      last_y = info.point[i].y;
+      is_pressed = true;
+      break;
+    }
+    else
+    {
+      if (info.point[i].id == last_id)
+      {
+        last_x = info.point[i].x;
+        last_y = info.point[i].y;
+        is_pressed = true;
+        break;
+      }
+    }
+  }
 
   if(is_pressed == true) 
   {

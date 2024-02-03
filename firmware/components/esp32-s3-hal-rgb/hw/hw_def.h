@@ -22,10 +22,12 @@
 #define _HW_DEF_RTOS_THREAD_PRI_CLI           5
 #define _HW_DEF_RTOS_THREAD_PRI_LCD           5
 #define _HW_DEF_RTOS_THREAD_PRI_GT911         5
+#define _HW_DEF_RTOS_THREAD_PRI_FT6236        5
 
 #define _HW_DEF_RTOS_THREAD_MEM_CLI           (8*1024)
 #define _HW_DEF_RTOS_THREAD_MEM_LCD           (2*1024)
 #define _HW_DEF_RTOS_THREAD_MEM_GT911         (4*1024)
+#define _HW_DEF_RTOS_THREAD_MEM_FT6236        (2*1024)
 
 
 #define _USE_HW_RTOS
@@ -33,6 +35,7 @@
 #define _USE_HW_CDC
 #define _USE_HW_LCDC
 #define _USE_HW_LVGL
+#define _USE_HW_FT6236
 
 
 #define _USE_HW_UART
@@ -57,14 +60,13 @@
 #define      HW_I2C_MAX_CH          1
 
 #define _USE_HW_TOUCH
-#define      HW_TOUCH_MAX_CH        5
+#define      HW_TOUCH_MAX_CH        2
 
 #define _USE_HW_GPIO
 #define      HW_GPIO_MAX_CH         4
 
 #define _USE_HW_PWM
 #define      HW_PWM_MAX_CH          1
-
 
 #define _USE_HW_LCDC
 
