@@ -69,6 +69,8 @@
 #define      HW_PWM_MAX_CH          1
 
 #define _USE_HW_LCDC
+#define      HW_LCDC_CLK_MHZ        12
+#define      HW_LCDC_FB_CNT         3
 
 #define _USE_HW_ST7701
 #define      HW_ST7701_WIDTH       320
@@ -78,6 +80,7 @@
 #define      HW_LCD_LVGL            1
 #define      HW_LCD_LOGO            1
 #define      HW_LCD_ROTATE          1
+#define      HW_LCD_FB_CNT          HW_LCDC_FB_CNT
 
 #if HW_LCD_ROTATE == 1
 #define      HW_LCD_WIDTH           HW_ST7701_HEIGHT

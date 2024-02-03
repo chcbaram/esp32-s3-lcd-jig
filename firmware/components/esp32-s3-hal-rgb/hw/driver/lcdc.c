@@ -67,7 +67,7 @@ bool lcdcBegin(uint16_t width, uint16_t height, uint8_t bus_width, uint32_t freq
       .bits_per_pixel         = 16,
       .psram_trans_align      = 64,
       // .bounce_buffer_size_px  = height * 20,
-      .num_fbs                = 3,
+      .num_fbs                = HW_LCDC_FB_CNT,
       .clk_src                = LCD_CLK_SRC_PLL160M,
       .disp_gpio_num          = GPIO_NUM_NC,
       .pclk_gpio_num          = GPIO_LCD_PCLK,
@@ -92,10 +92,10 @@ bool lcdcBegin(uint16_t width, uint16_t height, uint8_t bus_width, uint32_t freq
           // The following parameters should refer to LCD spec
           .hsync_back_porch   = 50, // 50
           .hsync_front_porch  = 10, // 10
-          .hsync_pulse_width  = 8,
+          .hsync_pulse_width  = 58,
           .vsync_back_porch   = 20, // 20
           .vsync_front_porch  = 10, // 10
-          .vsync_pulse_width  = 8,      
+          .vsync_pulse_width  = 58,      
       },
       .flags.fb_in_psram       = true, // allocate frame buffer in PSRAM
       .flags.refresh_on_demand = false,
@@ -153,7 +153,7 @@ void *lcdcGetFrameBuffer(uint8_t index)
   if (index >= 3)
     return NULL;  
 
-  esp_lcd_rgb_panel_get_frame_buffer(h_panel, 3, &buf[0], &buf[1], &buf[2]);  
+  esp_lcd_rgb_panel_get_frame_buffer(h_panel, HW_LCD_FB_CNT, &buf[0], &buf[1], &buf[2]);  
 
   return buf[index];
 }

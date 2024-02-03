@@ -20,7 +20,7 @@
 #define unLock()      xSemaphoreGive(mutex_lock);
 
 #define LCD_OPT_DEF             __attribute__((optimize("O2")))
-#define LCD_FRAME_BUF_MAX       3
+#define LCD_FRAME_BUF_MAX       HW_LCD_FB_CNT
 #define LCD_FONT_RESIZE_WIDTH  64
 
 #ifndef _swap_int16_t
@@ -112,7 +112,7 @@ bool lcdInit(void)
 
   lcdcSetCallBack(lcdTransferDoneISR);
 
-  ret = lcdcBegin(LCD_WIDTH, LCD_HEIGHT, 16, 10);
+  ret = lcdcBegin(LCD_WIDTH, LCD_HEIGHT, 16, HW_LCDC_CLK_MHZ);
   logPrintf("[%s] lcdcBegin()\n", ret ? "OK":"NG");
 
   if (ret != true)
